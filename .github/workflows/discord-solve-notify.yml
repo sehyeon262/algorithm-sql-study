@@ -114,7 +114,7 @@ jobs:
                   or details["commit"]["author"]["name"]
               )
               send(
-                  f"✅ **{kind} 풀이 제출**\n"
+                  f"## ✅ {kind} 풀이 제출\n"
                   f"작성자: {author}\n"
                   f"문제: {problem}\n"
                   f"https://github.com/{repository}/commit/{sha}"
