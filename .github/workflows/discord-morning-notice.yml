@@ -1,0 +1,49 @@
+name: Discord morning study notice
+
+on:
+  schedule:
+    - cron: '0 9 * * 1-5'
+      timezone: 'Asia/Seoul'
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Discord notice
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.MORNING_DISCORD_WEBHOOK_URL }}
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+          from urllib.request import Request, urlopen
+
+          webhook_url = os.environ.get('DISCORD_WEBHOOK_URL', '')
+          if not webhook_url:
+              raise SystemExit('MORNING_DISCORD_WEBHOOK_URL secret is missing')
+
+          message = (
+              '🧪 오전 9시 학습 공지 연결 테스트'
+              if os.environ['GITHUB_EVENT_NAME'] == 'workflow_dispatch'
+              else '## 📢 오늘의 학습 공지\n알고리즘 1문제와 SQL 1문제를 풀어주세요!'
+          )
+          body = json.dumps(
+              {'content': message, 'allowed_mentions': {'parse': []}},
+              ensure_ascii=False,
+          ).encode('utf-8')
+          request = Request(
+              webhook_url,
+              data=body,
+              headers={
+                  'Content-Type': 'application/json; charset=utf-8',
+                  'User-Agent': 'DiscordBot (https://example.org, 1.0)',
+              },
+              method='POST',
+          )
+          with urlopen(request, timeout=20):
+              pass
+          print('Discord notice sent')
+          PY
